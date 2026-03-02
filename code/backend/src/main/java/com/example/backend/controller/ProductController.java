@@ -1,0 +1,44 @@
+package com.example.backend.controller;
+
+import com.example.backend.dto.ProductDTO;
+import com.example.backend.entity.Product;
+import com.example.backend.service.ProductService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("api/v1.o/products")
+public class ProductController {
+    private final ProductService productService;
+    public ProductController(ProductService productService){
+        this.productService=productService;
+    }
+    @GetMapping()
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<Product> getAllProducts(){
+        return productService.getAllProducts();
+    }
+    @GetMapping("/{productId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ProductDTO getProductById(@PathVariable Long productId){
+        return productService.getProductById(productId);
+    }
+    @PostMapping()
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public ProductDTO createProduct(@RequestBody @Valid ProductDTO productDTO){
+        return productService.createProduct(productDTO);
+    }
+    @PutMapping("/{id}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ProductDTO updateProduct(@RequestBody @Valid ProductDTO productDto){
+        return productService.updateProduct(productDto);
+    }
+    @DeleteMapping
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void deleteProduct(Long productId){
+        productService.deleteProduct(productId);
+    }
+}
