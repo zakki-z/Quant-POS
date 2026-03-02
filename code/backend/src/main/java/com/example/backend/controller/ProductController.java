@@ -31,10 +31,10 @@ public class ProductController {
     public ProductDTO createProduct(@RequestBody @Valid ProductDTO productDTO){
         return productService.createProduct(productDTO);
     }
-    @PutMapping("/{id}")
+    @PutMapping("/{productId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public ProductDTO updateProduct(@RequestBody @Valid ProductDTO productDto){
-        return productService.updateProduct(productDto);
+    public ProductDTO updateProduct(@PathVariable long productId,@RequestBody @Valid ProductDTO productDto){
+        return productService.updateProduct(productId,productDto);
     }
     @DeleteMapping("/{productId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)

@@ -16,29 +16,29 @@ public class OrderController {
     public OrderController(OrderService orderService){
         this.orderService=orderService;
     }
-    @GetMapping
+    @GetMapping()
     @ResponseStatus(value = HttpStatus.OK)
     public List<Order> getAllOrders(){
         return orderService.getAllOrders();
     }
     @GetMapping("/{orderId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public OrderDTO getOrderById(long orderId){
+    public OrderDTO getOrderById(@PathVariable long orderId){
         return orderService.getOrderById(orderId);
     }
-    @PostMapping
+    @PostMapping()
     @ResponseStatus(value = HttpStatus.CREATED)
     public OrderDTO createOrder(@RequestBody @Valid OrderDTO orderDTO){
         return orderService.createOrder(orderDTO);
     }
-    @PutMapping("/{id}")
+    @PutMapping("/{orderId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public OrderDTO updateOrder(@RequestBody @Valid OrderDTO orderDTO){
-        return orderService.updateOrder(orderDTO);
+    public OrderDTO updateOrder(@PathVariable long orderId,@RequestBody @Valid OrderDTO orderDTO){
+        return orderService.updateOrder(orderId,orderDTO);
     }
     @DeleteMapping("/{orderId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteOrder(long orderId){
+    public void deleteOrder(@PathVariable long orderId){
         orderService.deleteProduct(orderId);
     }
 }

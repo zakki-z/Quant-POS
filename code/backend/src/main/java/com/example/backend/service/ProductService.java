@@ -31,8 +31,13 @@ public class ProductService {
                 .orElseThrow(() -> new IllegalArgumentException("Cannot find order with id " + productId));
         return productDTOMapper.toDto(product);
     }
-    public ProductDTO updateProduct(ProductDTO productDTO){
-        return productDTOMapper.toDto(productRepository.save(productDTOMapper.toEntity(productDTO)));
+    public ProductDTO updateProduct(Long productId, ProductDTO productDTO) {
+        Product existingProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find product with id " + productId));
+        // Use MapStruct to update fields automatically
+        productDTOMapper.updateEntityFromDto(productDTO, existingProduct);
+        Product updatedProduct = productRepository.save(existingProduct);
+        return productDTOMapper.toDto(updatedProduct);
     }
     public void deleteProduct(Long productId){
         productRepository.deleteById(productId);

@@ -25,10 +25,14 @@ public class OrderService {
         return orderDTOMapper.toDto(order);
     }
     public OrderDTO createOrder(OrderDTO orderDTO){
-        return orderDTOMapper.toDto(orderDTOMapper.toEntity(orderDTO));
-    }
-    public OrderDTO updateOrder(OrderDTO orderDTO){
         return orderDTOMapper.toDto(orderRepository.save(orderDTOMapper.toEntity(orderDTO)));
+    }
+    public OrderDTO updateOrder(long orderId,OrderDTO orderDTO){
+        Order existingOrder = orderRepository.findById(orderId)
+                .orElseThrow(()->new IllegalArgumentException("cannot find order with id"+orderId));
+        orderDTOMapper.updateEntityFromDto(orderDTO, existingOrder);
+        Order updatedOrder = orderRepository.save(existingOrder);
+        return orderDTOMapper.toDto(updatedOrder);
     }
     public void deleteProduct(long orderId){
         orderRepository.deleteById(orderId);
