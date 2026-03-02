@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1.o/products")
+@RequestMapping("api/v1.0/products")
 public class ProductController {
     private final ProductService productService;
     public ProductController(ProductService productService){
@@ -36,9 +36,9 @@ public class ProductController {
     public ProductDTO updateProduct(@RequestBody @Valid ProductDTO productDto){
         return productService.updateProduct(productDto);
     }
-    @DeleteMapping
+    @DeleteMapping("/{productId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteProduct(Long productId){
+    public void deleteProduct(@PathVariable Long productId){
         productService.deleteProduct(productId);
     }
 }
