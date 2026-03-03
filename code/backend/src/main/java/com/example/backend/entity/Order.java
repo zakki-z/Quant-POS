@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,13 +16,22 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @Column(nullable = false, updatable = true, precision = 10, scale = 2)
-    private BigDecimal quantity;
-    @Column(nullable = true, precision = 10, scale = 2)
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderLine> orderLines = new ArrayList<>();
+
+    @Column(precision = 10, scale = 2)
     private BigDecimal totalPrice;
-    @Column(nullable = true, precision = 10, scale = 2)
+
+    @Column(precision = 10, scale = 2)
     private BigDecimal paidAmount;
-    @Column(nullable = true, precision = 10, scale = 2)
+
+    @Column(precision = 10, scale = 2)
     private BigDecimal remainingAmount;
+
     private String description;
 }
