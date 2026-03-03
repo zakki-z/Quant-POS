@@ -3,7 +3,9 @@ package com.example.backend.service;
 import com.example.backend.DTOMapper.OrderDTOMapper;
 import com.example.backend.dto.OrderDTO;
 import com.example.backend.entity.Order;
+import com.example.backend.exception.OrderNotFoundException;
 import com.example.backend.repository.OrderRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,19 +23,21 @@ public class OrderService {
     }
     public OrderDTO getOrderById(long orderId){
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(()->new IllegalArgumentException(""));
+                .orElseThrow(()->new OrderNotFoundException("cannot find order with id"+orderId));
         return orderDTOMapper.toDto(order);
     }
     public OrderDTO createOrder(OrderDTO orderDTO){
         return orderDTOMapper.toDto(orderRepository.save(orderDTOMapper.toEntity(orderDTO)));
     }
+    @PreAuthorize("hasRole('ADMIN')")
     public OrderDTO updateOrder(long orderId,OrderDTO orderDTO){
         Order existingOrder = orderRepository.findById(orderId)
-                .orElseThrow(()->new IllegalArgumentException("cannot find order with id"+orderId));
+                .orElseThrow(()->new OrderNotFoundException("cannot find order with id"+orderId));
         orderDTOMapper.updateEntityFromDto(orderDTO, existingOrder);
         Order updatedOrder = orderRepository.save(existingOrder);
         return orderDTOMapper.toDto(updatedOrder);
     }
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteProduct(long orderId){
         orderRepository.deleteById(orderId);
     }

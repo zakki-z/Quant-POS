@@ -4,7 +4,9 @@ package com.example.backend.service;
 import com.example.backend.DTOMapper.ProductDTOMapper;
 import com.example.backend.dto.ProductDTO;
 import com.example.backend.entity.Product;
+import com.example.backend.exception.ProductNotFoundException;
 import com.example.backend.repository.ProductRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,17 +30,19 @@ public class ProductService {
     }
     public ProductDTO getProductById(Long productId){
         Product product= productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find order with id " + productId));
+                .orElseThrow(() -> new ProductNotFoundException("Cannot find order with id " + productId));
         return productDTOMapper.toDto(product);
     }
+    @PreAuthorize("hasRole('ADMIN')")
     public ProductDTO updateProduct(Long productId, ProductDTO productDTO) {
         Product existingProduct = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find product with id " + productId));
+                .orElseThrow(() -> new ProductNotFoundException("Cannot find product with id " + productId));
         // Use MapStruct to update fields automatically
         productDTOMapper.updateEntityFromDto(productDTO, existingProduct);
         Product updatedProduct = productRepository.save(existingProduct);
         return productDTOMapper.toDto(updatedProduct);
     }
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteProduct(Long productId){
         productRepository.deleteById(productId);
     }
