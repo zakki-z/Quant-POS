@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2.5 group">
                     <div className="w-8 h-8 rounded-lg bg-[var(--accent)] flex items-center justify-center text-white font-bold text-sm tracking-tight shadow-sm">
-                        G
+                        QP
                     </div>
                     <span
                         className="text-lg font-bold tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors"
@@ -37,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         { href: '/pos', label: 'POS' },
                         { href: '/products', label: 'Products' },
                         { href: '/orders', label: 'Orders' },
+                        { href: '/admin', label: 'Admin' },
                     ].map(link => (
                         <Link
                             key={link.href}

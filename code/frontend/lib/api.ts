@@ -127,6 +127,7 @@ async function request<T>(
 export type Product = { id: number; name: string; price: number };
 export type Order = { id: number; description: string; totalPrice: number; quantity: number; paidAmount: number; remainingAmount: number };
 export type TokenPair = { accessToken: string; refreshToken: string };
+export type UserInfo = { id: number; username: string; role: string };
 
 // ── Auth endpoints ────────────────────────────────────────
 export const auth = {
@@ -223,5 +224,27 @@ export const orders = {
 
     async delete(id: number, customToken?: string): Promise<void> {
         await request<void>(`/v1.0/orders/${id}`, { method: 'DELETE' }, customToken);
+    },
+};
+
+// ── User endpoints (Admin) ────────────────────────────────
+export const users = {
+    async getAll(customToken?: string): Promise<UserInfo[]> {
+        return request<UserInfo[]>('/users', {}, customToken);
+    },
+
+    async getById(id: number, customToken?: string): Promise<UserInfo> {
+        return request<UserInfo>(`/users/${id}`, {}, customToken);
+    },
+
+    async update(id: number, user: { username?: string; password?: string }, customToken?: string): Promise<UserInfo> {
+        return request<UserInfo>(`/users/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(user),
+        }, customToken);
+    },
+
+    async delete(id: number, customToken?: string): Promise<void> {
+        await request<void>(`/users/${id}`, { method: 'DELETE' }, customToken);
     },
 };
