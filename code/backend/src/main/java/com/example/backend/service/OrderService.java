@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderService {
@@ -24,8 +25,17 @@ public class OrderService {
         this.orderRepository=orderRepository;
         this.orderDTOMapper=orderDTOMapper;
     }
+    //TODO: allow only the admin to get all the orders
+    //@PreAuthorize("hasRole('ADMIN')")
     public List<Order> getAllOrders(){
         return orderRepository.findAll();
+    }
+    //TODO: clean up
+    public List<Order> getAllOrdersPerUser(User user){
+//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        return orderRepository.findByUser(user);
     }
     public OrderDTO getOrderById(long orderId){
         Order order = orderRepository.findById(orderId)

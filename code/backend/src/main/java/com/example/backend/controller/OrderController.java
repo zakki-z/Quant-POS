@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.OrderDTO;
 import com.example.backend.entity.Order;
+import com.example.backend.entity.User;
 import com.example.backend.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,11 @@ public class OrderController {
     @ResponseStatus(value = HttpStatus.OK)
     public List<Order> getAllOrders(){
         return orderService.getAllOrders();
+    }
+    @GetMapping("/{user}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<Order> getAllOrdersPerUser(@PathVariable @RequestBody @Valid User user){
+        return orderService.getAllOrdersPerUser(user);
     }
     @GetMapping("/{orderId}")
     @ResponseStatus(value = HttpStatus.OK)
