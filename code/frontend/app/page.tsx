@@ -2,34 +2,37 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center text-center">
-        <div className="bg-white p-10 rounded-xl shadow-sm border border-gray-100 max-w-lg w-full">
-          <h1 className="text-4xl font-extrabold mb-4 text-gray-900">Quant POS</h1>
-          <p className="text-gray-600 mb-8">
-            A minimalist point-of-sale system. Manage your products, process orders, and handle transactions seamlessly.
+      <div className="min-h-[75vh] flex items-center justify-center">
+        <div className="card p-10 max-w-lg w-full text-center animate-in">
+          {/* Logo mark */}
+          <div className="mx-auto mb-6 w-16 h-16 rounded-2xl bg-[var(--accent)] flex items-center justify-center shadow-lg">
+            <span className="text-white text-2xl font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>G</span>
+          </div>
+
+          <h1
+              className="text-4xl font-black mb-3 text-[var(--text-primary)] tracking-tight"
+              style={{ fontFamily: 'Playfair Display, serif' }}
+          >
+            GatherPOS
+          </h1>
+          <p className="text-[var(--text-secondary)] mb-8 leading-relaxed">
+            A refined point-of-sale system. Manage products, process orders, and handle transactions with ease.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-                href="/login"
-                className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition"
-            >
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+            <Link href="/login" className="btn btn-primary flex-1 py-3 text-base">
               Sign In
             </Link>
-            <Link
-                href="/register"
-                className="flex-1 bg-white text-blue-600 border border-blue-600 px-6 py-3 rounded-md font-medium hover:bg-blue-50 transition"
-            >
+            <Link href="/register" className="btn btn-ghost flex-1 py-3 text-base">
               Create Account
             </Link>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-gray-100 text-sm text-gray-500 text-left">
-            <p className="font-semibold mb-2">Quick Testing Tip:</p>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Create an account as a <b>USER</b> to test the POS checkout.</li>
-              <li>Create an account as an <b>ADMIN</b> to test adding, updating, or deleting products.</li>
-            </ul>
+          <div className="pt-6 border-t border-[var(--border)] text-sm text-[var(--text-secondary)] text-left">
+            <p className="font-semibold mb-2 text-[var(--text-primary)]">Quick Testing Tip</p>
+            <p className="leading-relaxed">
+              Create a <strong>USER</strong> account to test POS checkout, or an <strong>ADMIN</strong> account to manage products (add, update, delete).
+            </p>
           </div>
         </div>
       </div>

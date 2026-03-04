@@ -1,34 +1,74 @@
-// app/orders/page.tsx
 'use client';
 import { useState, useEffect } from 'react';
-import { fetchApi } from '@/lib/api';
-
-type Order = { id: number; description: string; totalPrice: number; quantity: number };
+import { orders as ordersApi, type Order } from '@/lib/api';
 
 export default function Orders() {
-    const [orders, setOrders] = useState<Order[]>([]);
+    const [orderList, setOrderList] = useState<Order[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchApi('/v1.0/orders').then(setOrders).catch(console.error);
+        ordersApi.getAll()
+            .then(setOrderList)
+            .catch(console.error)
+            .finally(() => setLoading(false));
     }, []);
 
     return (
-        <div className="bg-white p-6 rounded shadow-sm border">
-            <h2 className="text-xl font-bold mb-4">Order History</h2>
-            <div className="space-y-3">
-                {orders.map(order => (
-                    <div key={order.id} className="p-4 border rounded bg-gray-50 flex justify-between items-center">
-                        <div>
-                            <div className="font-semibold text-sm text-gray-500">Order #{order.id}</div>
-                            <div className="mt-1">{order.description}</div>
-                        </div>
-                        <div className="text-right">
-                            <div className="font-bold">${order.totalPrice.toFixed(2)}</div>
-                            <div className="text-xs text-gray-400">{order.quantity} items</div>
-                        </div>
+        <div className="animate-in">
+            <div className="mb-6">
+                <h1
+                    className="text-2xl font-bold tracking-tight"
+                    style={{ fontFamily: 'Playfair Display, serif' }}
+                >
+                    Order History
+                </h1>
+                <p className="text-sm text-[var(--text-muted)] mt-1">
+                    {orderList.length > 0
+                        ? `${orderList.length} order${orderList.length !== 1 ? 's' : ''} on record`
+                        : 'Your completed orders will appear here'
+                    }
+                </p>
+            </div>
+
+            <div className="card-flat overflow-hidden">
+                {loading ? (
+                    <div className="text-center py-16 text-[var(--text-muted)]">Loading orders…</div>
+                ) : orderList.length === 0 ? (
+                    <div className="text-center py-16">
+                        <div className="text-4xl mb-3 opacity-30">📋</div>
+                        <p className="text-[var(--text-muted)] text-sm">No orders found. Process your first sale from the POS page.</p>
                     </div>
-                ))}
-                {orders.length === 0 && <p className="text-gray-500 text-sm">No orders found.</p>}
+                ) : (
+                    <div className="divide-y divide-[var(--border)]">
+                        {orderList.map((order, index) => (
+                            <div
+                                key={order.id}
+                                className="flex items-center justify-between p-5 hover:bg-[var(--bg-base)] transition"
+                                style={{ animationDelay: `${index * 40}ms` }}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-lg bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)] font-bold text-xs">
+                                        #{order.id}
+                                    </div>
+                                    <div>
+                                        <div className="font-medium text-sm text-[var(--text-primary)]">{order.description}</div>
+                                        <div className="text-xs text-[var(--text-muted)] mt-0.5">
+                                            {order.quantity} item{order.quantity !== 1 ? 's' : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="font-bold text-[var(--accent)]">${order.totalPrice.toFixed(2)}</div>
+                                    {order.remainingAmount > 0 && (
+                                        <div className="text-xs text-[var(--danger)] mt-0.5">
+                                            ${order.remainingAmount.toFixed(2)} remaining
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

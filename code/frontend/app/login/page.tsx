@@ -1,39 +1,87 @@
-// app/login/page.tsx
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { auth } from '@/lib/api';
 
 export default function Login() {
     const [form, setForm] = useState({ username: '', password: '' });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const router = useRouter();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+        setLoading(true);
+
         try {
-            const res = await fetch('http://localhost:8080/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form)
-            });
-            if (!res.ok) throw new Error('Login failed');
-            const data = await res.json();
-            localStorage.setItem('accessToken', data.accessToken);
+            await auth.login(form.username, form.password);
             router.push('/pos');
-        } catch (err) {
-            alert('Invalid credentials');
+        } catch {
+            setError('Invalid username or password. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="max-w-sm mx-auto bg-white p-6 mt-12 rounded shadow-sm border border-gray-100">
-            <h2 className="text-2xl font-bold mb-4">Sign In</h2>
-            <form onSubmit={handleLogin} className="space-y-3">
-                <input className="w-full border p-2 rounded" placeholder="Username" onChange={e => setForm({...form, username: e.target.value})} required />
-                <input className="w-full border p-2 rounded" type="password" placeholder="Password" onChange={e => setForm({...form, password: e.target.value})} required />
-                <button className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Login</button>
-            </form>
-            <div className="mt-4 text-sm">Don't have an account? <Link href="/register" className="text-blue-600">Sign Up</Link></div>
+        <div className="min-h-[70vh] flex items-center justify-center">
+            <div className="card p-8 max-w-sm w-full animate-in">
+                <div className="mb-6">
+                    <h2
+                        className="text-2xl font-bold tracking-tight text-[var(--text-primary)]"
+                        style={{ fontFamily: 'Playfair Display, serif' }}
+                    >
+                        Welcome back
+                    </h2>
+                    <p className="text-sm text-[var(--text-muted)] mt-1">Sign in to your account</p>
+                </div>
+
+                {error && (
+                    <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                        {error}
+                    </div>
+                )}
+
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">Username</label>
+                        <input
+                            className="input"
+                            placeholder="Enter your username"
+                            value={form.username}
+                            onChange={e => setForm({ ...form, username: e.target.value })}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">Password</label>
+                        <input
+                            className="input"
+                            type="password"
+                            placeholder="Enter your password"
+                            value={form.password}
+                            onChange={e => setForm({ ...form, password: e.target.value })}
+                            required
+                        />
+                    </div>
+                    <button
+                        onClick={handleLogin}
+                        disabled={loading}
+                        className="btn btn-primary w-full py-3 mt-2 disabled:opacity-60"
+                    >
+                        {loading ? 'Signing in…' : 'Sign In'}
+                    </button>
+                </div>
+
+                <p className="mt-6 text-sm text-center text-[var(--text-muted)]">
+                    Don&apos;t have an account?{' '}
+                    <Link href="/register" className="text-[var(--accent)] font-semibold hover:underline">
+                        Create one
+                    </Link>
+                </p>
+            </div>
         </div>
     );
 }
