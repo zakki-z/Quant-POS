@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { products as productsApi, orders as ordersApi, type Product } from '@/lib/api';
+import { products as productsApi, orders as ordersApi, getUsername, type Product } from '@/lib/api';
+import { generateReceiptPDF } from '@/lib/receipt-generator';
 
 type CartItem = Product & { quantity: number };
 
@@ -56,9 +57,25 @@ export default function POS() {
         };
 
         try {
-            await ordersApi.create(orderData);
+            const createdOrder = await ordersApi.create(orderData);
+
+            // Generate and download receipt PDF
+            generateReceiptPDF({
+                orderId: createdOrder.id,
+                username: getUsername() || 'Unknown',
+                items: cart.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                })),
+                total,
+                paidAmount: total,
+                date: new Date(),
+            });
+
             setCart([]);
-            alert('Checkout successful!');
+            alert('Checkout successful! Your receipt has been downloaded.');
         } catch {
             alert('Checkout failed. Please try again.');
         } finally {
@@ -164,7 +181,7 @@ export default function POS() {
                                         disabled={checkingOut}
                                         className="btn btn-success w-full py-3 disabled:opacity-60"
                                     >
-                                        {checkingOut ? 'Processing…' : 'Checkout'}
+                                        {checkingOut ? 'Processing…' : 'Checkout & Download Receipt'}
                                     </button>
                                 </>
                             )}

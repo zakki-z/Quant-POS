@@ -41,6 +41,31 @@ export function clearTokens() {
     localStorage.removeItem('refreshToken');
 }
 
+/**
+ * Extracts the username (subject) from the current JWT access token.
+ * Returns null if no token is present or the token is malformed.
+ */
+export function getUsername(): string | null {
+    const token = getAccessToken();
+    if (!token) return null;
+
+    try {
+        // JWT structure: header.payload.signature — we need the payload
+        const parts = token.split('.');
+        if (parts.length !== 3) return null;
+
+        // Base64url decode the payload
+        const payload = parts[1];
+        const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+        const parsed = JSON.parse(decoded);
+
+        // The backend sets the username as the JWT "sub" (subject) claim
+        return parsed.sub ?? null;
+    } catch {
+        return null;
+    }
+}
+
 // ── Custom error class ────────────────────────────────────
 export class ApiError extends Error {
     status: number;

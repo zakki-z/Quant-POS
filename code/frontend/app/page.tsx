@@ -6,14 +6,14 @@ export default function Home() {
         <div className="card p-10 max-w-lg w-full text-center animate-in">
           {/* Logo mark */}
           <div className="mx-auto mb-6 w-16 h-16 rounded-2xl bg-[var(--accent)] flex items-center justify-center shadow-lg">
-            <span className="text-white text-2xl font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>G</span>
+            <span className="text-white text-2xl font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>QP</span>
           </div>
 
           <h1
               className="text-4xl font-black mb-3 text-[var(--text-primary)] tracking-tight"
               style={{ fontFamily: 'Playfair Display, serif' }}
           >
-            GatherPOS
+            QuantPOS
           </h1>
           <p className="text-[var(--text-secondary)] mb-8 leading-relaxed">
             A refined point-of-sale system. Manage products, process orders, and handle transactions with ease.

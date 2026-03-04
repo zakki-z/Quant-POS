@@ -3,7 +3,7 @@ import './globals.css';
 import Link from 'next/link';
 
 export const metadata = {
-    title: 'GatherPOS',
+    title: 'QuantPOS',
     description: 'A modern point-of-sale system',
 };
 
@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         className="text-lg font-bold tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors"
                         style={{ fontFamily: 'Playfair Display, serif' }}
                     >
-                        GatherPOS
+                        QuantPOS
                     </span>
                 </Link>
                 <div className="flex items-center gap-1">

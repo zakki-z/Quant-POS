@@ -36,7 +36,7 @@ export default function Register() {
                     >
                         Create account
                     </h2>
-                    <p className="text-sm text-[var(--text-muted)] mt-1">Get started with GatherPOS</p>
+                    <p className="text-sm text-[var(--text-muted)] mt-1">Get started with QuantPOS</p>
                 </div>
 
                 {error && (
