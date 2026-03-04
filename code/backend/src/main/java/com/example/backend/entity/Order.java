@@ -3,8 +3,11 @@ package com.example.backend.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,11 +30,8 @@ public class Order {
     @Column(precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal paidAmount;
-
-    @Column(precision = 10, scale = 2)
-    private BigDecimal remainingAmount;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
     private String description;
 }
