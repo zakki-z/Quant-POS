@@ -3,6 +3,7 @@ package com.example.backend.service;
 
 import com.example.backend.dto.response.TokenPair;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -99,20 +100,20 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        Claims claims = null;
+                Claims claims = null;
 
-        try {
-            claims = Jwts.parser()
-                    .verifyWith(getSignInKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new RuntimeException(e);
-        }
+                try {
+                        claims = Jwts.parser()
+                                .verifyWith(getSignInKey())
+                                .build()
+                                .parseSignedClaims(token)
+                                .getPayload();
+                    } catch (JwtException | IllegalArgumentException e) {
+                        throw new RuntimeException(e);
+                    }
 
-        return claims;
-    }
+                return claims;
+            }
 
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);

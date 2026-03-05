@@ -25,6 +25,7 @@ public class User implements UserDetails {
     private String username;
     @NotNull
     private String password;
+    @Enumerated(EnumType.STRING)
     private ERole role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
