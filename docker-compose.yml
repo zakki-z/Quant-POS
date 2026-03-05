@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD:$POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Cache (Required by backend application.properties)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: ./code/backend
+      dockerfile: ../../infra/java/Dockerfile
+    environment:
+      - DB_URL=$DB_URL
+      # Overrides the 'localhost' default in application.properties to point to the docker container
+      - SPRING_DATA_REDIS_HOST=redis 
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+
+  # Next.js / Node.js Frontend
+  frontend:
+    build:
+      context: ./code/frontend
+      dockerfile: ../../infra/nodejs/Dockerfile
+    ports:
+      - "3000:3000"
+
+  # Nginx Reverse Proxy
+  nginx:
+    build:
+      context: ./infra/nginx
+      dockerfile: Dockerfile
+    volumes:
+      # Mount the provided nginx config directly into the container
+      - ./infra/nginx/config/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  postgres_data:
