@@ -33,7 +33,7 @@ public class ProductService {
                 .orElseThrow(() -> new ProductNotFoundException("Cannot find order with id " + productId));
         return productDTOMapper.toDto(product);
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ProductDTO updateProduct(Long productId, ProductDTO productDTO) {
         Product existingProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Cannot find product with id " + productId));
@@ -42,7 +42,7 @@ public class ProductService {
         Product updatedProduct = productRepository.save(existingProduct);
         return productDTOMapper.toDto(updatedProduct);
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public void deleteProduct(Long productId){
         productRepository.deleteById(productId);
     }

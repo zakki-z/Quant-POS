@@ -26,7 +26,7 @@ public class OrderService {
         this.orderDTOMapper=orderDTOMapper;
     }
     //TODO: allow only the admin to get all the orders
-    //@PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasAuthority('ADMIN')")
     public List<Order> getAllOrders(){
         return orderRepository.findAll();
     }
@@ -54,7 +54,7 @@ public class OrderService {
 
         return orderDTOMapper.toDto(orderRepository.save(order));
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public OrderDTO updateOrder(long orderId,OrderDTO orderDTO){
         Order existingOrder = orderRepository.findById(orderId)
                 .orElseThrow(()->new OrderNotFoundException("cannot find order with id"+orderId));
@@ -62,7 +62,7 @@ public class OrderService {
         Order updatedOrder = orderRepository.save(existingOrder);
         return orderDTOMapper.toDto(updatedOrder);
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public void deleteProduct(long orderId){
         orderRepository.deleteById(orderId);
     }

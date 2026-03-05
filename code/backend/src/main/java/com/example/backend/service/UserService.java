@@ -14,20 +14,20 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found for ID: " + userId));
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public User addNewUser(User user) {
         return userRepository.save(user);
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public User updateUser(Long userId, User updatedUser) {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found for ID: " + userId));
@@ -35,7 +35,7 @@ public class UserService {
         existingUser.setPassword(updatedUser.getPassword());
         return userRepository.save(existingUser);
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
     }

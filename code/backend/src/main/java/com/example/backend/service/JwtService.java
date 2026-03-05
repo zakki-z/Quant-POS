@@ -42,7 +42,13 @@ public class JwtService {
 
     // Generate access token
     public String generateAccessToken(Authentication authentication) {
-        return generateToken(authentication, jwtExpirationMs, new HashMap<>());
+        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
+        Map<String, String> claims = new HashMap<>();
+        // Add the role from the user's authorities
+        userPrincipal.getAuthorities().stream()
+                .findFirst()
+                .ifPresent(authority -> claims.put("role", authority.getAuthority()));
+        return generateToken(authentication, jwtExpirationMs, claims);
     }
 
     // Generate refresh token

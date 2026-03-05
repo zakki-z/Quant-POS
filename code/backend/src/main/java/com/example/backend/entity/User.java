@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -15,6 +16,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 @Setter
 @Table(name = "users")
 public class User implements UserDetails {
@@ -28,6 +30,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private ERole role;
 
+    //TODO: remove and use DTOs in services
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Order> orders = new ArrayList<>();
