@@ -42,28 +42,46 @@ export function clearTokens() {
 }
 
 /**
- * Extracts the username (subject) from the current JWT access token.
- * Returns null if no token is present or the token is malformed.
+ * Decodes the JWT payload from the current access token.
+ * Returns null if no token or malformed.
  */
-export function getUsername(): string | null {
+function decodeTokenPayload(): Record<string, unknown> | null {
     const token = getAccessToken();
     if (!token) return null;
 
     try {
-        // JWT structure: header.payload.signature — we need the payload
         const parts = token.split('.');
         if (parts.length !== 3) return null;
 
-        // Base64url decode the payload
         const payload = parts[1];
         const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
-        const parsed = JSON.parse(decoded);
-
-        // The backend sets the username as the JWT "sub" (subject) claim
-        return parsed.sub ?? null;
+        return JSON.parse(decoded);
     } catch {
         return null;
     }
+}
+
+/**
+ * Extracts the username (subject) from the current JWT access token.
+ */
+export function getUsername(): string | null {
+    const payload = decodeTokenPayload();
+    return (payload?.sub as string) ?? null;
+}
+
+/**
+ * Extracts the user role from the current JWT access token.
+ * The backend encodes the role in the authorities or as a custom claim.
+ * Since Spring Security puts authorities in the token via the subject's
+ * granted authorities, and the current JwtService doesn't add a role claim,
+ * we store the role in localStorage at login time after decoding from
+ * the authorities endpoint or from a dedicated claim.
+ *
+ * Fallback: we also check localStorage for a cached role value set at login.
+ */
+export function getUserRole(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('userRole');
 }
 
 // ── Custom error class ────────────────────────────────────
@@ -113,7 +131,15 @@ async function request<T>(
             return {} as T;
         }
 
-        const data = await res.json();
+        // Handle both JSON and plain text responses
+        const contentType = res.headers.get('content-type') || '';
+        let data: T;
+        if (contentType.includes('application/json')) {
+            data = await res.json();
+        } else {
+            const text = await res.text();
+            data = text as unknown as T;
+        }
         log('info', `${res.status} OK (${duration}ms) — ${endpoint}`, data);
         return data as T;
     } catch (err) {
@@ -137,6 +163,21 @@ export const auth = {
             body: JSON.stringify({ username, password }),
         });
         setTokens(data.accessToken, data.refreshToken);
+
+        // Extract role from the JWT claims (the backend now includes it)
+        const payload = decodeTokenPayload();
+        if (payload?.role) {
+            // The role claim is the Spring Security authority, e.g. "ROLE_ADMIN"
+            const roleStr = String(payload.role);
+            if (roleStr.includes('ADMIN')) {
+                localStorage.setItem('userRole', 'ADMIN');
+            } else {
+                localStorage.setItem('userRole', 'USER');
+            }
+        } else {
+            localStorage.setItem('userRole', 'USER');
+        }
+
         return data;
     },
 
@@ -160,6 +201,9 @@ export const auth = {
 
     logout() {
         clearTokens();
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('userRole');
+        }
     },
 };
 

@@ -86,14 +86,14 @@ export default function Products() {
                 {/* Add product form */}
                 <div className="flex gap-3 mb-6 pb-6 border-b border-[var(--border)]">
                     <input
-                        className="input flex-1"
+                        className="input flex-3"
                         placeholder="Product name"
                         value={newProduct.name}
                         onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
                         required
                     />
                     <input
-                        className="input w-36"
+                        className="input flex-1"
                         type="number"
                         step="0.01"
                         placeholder="Price"

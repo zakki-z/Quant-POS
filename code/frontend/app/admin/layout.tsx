@@ -1,6 +1,8 @@
 'use client';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { getAccessToken, getUserRole } from '@/lib/api';
 
 const adminLinks = [
     { href: '/admin', label: 'Dashboard', icon: '◫' },
@@ -11,6 +13,36 @@ const adminLinks = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const router = useRouter();
+    const [authorized, setAuthorized] = useState(false);
+    const [checking, setChecking] = useState(true);
+
+    useEffect(() => {
+        const token = getAccessToken();
+        if (!token) {
+            router.replace('/login');
+            return;
+        }
+
+        const role = getUserRole();
+        if (role !== 'ADMIN') {
+            router.replace('/pos');
+            return;
+        }
+
+        setAuthorized(true);
+        setChecking(false);
+    }, [router]);
+
+    if (checking || !authorized) {
+        return (
+            <div className="flex gap-6 animate-in">
+                <div className="flex-1 text-center py-20 text-[var(--text-muted)]">
+                    Checking permissions…
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex gap-6 animate-in">
