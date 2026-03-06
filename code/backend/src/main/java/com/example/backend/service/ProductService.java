@@ -3,8 +3,10 @@ package com.example.backend.service;
 
 import com.example.backend.DTOMapper.ProductDTOMapper;
 import com.example.backend.dto.ProductDTO;
+import com.example.backend.entity.Category;
 import com.example.backend.entity.Product;
 import com.example.backend.exception.ProductNotFoundException;
+import com.example.backend.repository.CategoryRepository;
 import com.example.backend.repository.ProductRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -15,18 +17,24 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductDTOMapper productDTOMapper;
-    public ProductService(ProductDTOMapper productDTOMapper, ProductRepository productRepository){
+    private final CategoryRepository categoryRepository;
+    public ProductService(ProductDTOMapper productDTOMapper, ProductRepository productRepository, CategoryRepository categoryRepository){
         this.productRepository=productRepository;
         this.productDTOMapper=productDTOMapper;
+        this.categoryRepository=categoryRepository;
     }
     public List<Product> getAllProducts() {
 
         return productRepository.findAll();
     }
     public ProductDTO createProduct(ProductDTO productDTO) {
-        return productDTOMapper
-                .toDto(productRepository
-                        .save(productDTOMapper.toEntity(productDTO)));
+        Product product = productDTOMapper.toEntity(productDTO);
+        if (productDTO.categoryId() != null) {
+            Category category = categoryRepository.findById(productDTO.categoryId())
+                    .orElseThrow(() -> new ProductNotFoundException("Category not found with id " + productDTO.categoryId()));
+            product.setCategory(category);
+        }
+        return productDTOMapper.toDto(productRepository.save(product));
     }
     public ProductDTO getProductById(Long productId){
         Product product= productRepository.findById(productId)
@@ -37,8 +45,12 @@ public class ProductService {
     public ProductDTO updateProduct(Long productId, ProductDTO productDTO) {
         Product existingProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Cannot find product with id " + productId));
-        // Use MapStruct to update fields automatically
         productDTOMapper.updateEntityFromDto(productDTO, existingProduct);
+        if (productDTO.categoryId() != null) {
+            Category category = categoryRepository.findById(productDTO.categoryId())
+                    .orElseThrow(() -> new ProductNotFoundException("Category not found with id " + productDTO.categoryId()));
+            existingProduct.setCategory(category);
+        }
         Product updatedProduct = productRepository.save(existingProduct);
         return productDTOMapper.toDto(updatedProduct);
     }

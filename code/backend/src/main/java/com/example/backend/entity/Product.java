@@ -18,4 +18,7 @@ public class Product {
     private String name;
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "category_id")
+    private Category category;
 }

@@ -1,22 +1,31 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { products as productsApi, orders as ordersApi, getUsername, type Product } from '@/lib/api';
+import { products as productsApi, categories as categoriesApi, orders as ordersApi, getUsername, type Product, type Category } from '@/lib/api';
 import { generateReceiptPDF } from '@/lib/receipt-generator';
 
 type CartItem = Product & { quantity: number };
 
 export default function POS() {
     const [productList, setProductList] = useState<Product[]>([]);
+    const [categoryList, setCategoryList] = useState<Category[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     const [cart, setCart] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [checkingOut, setCheckingOut] = useState(false);
 
     useEffect(() => {
-        productsApi.getAll()
-            .then(setProductList)
+        Promise.all([productsApi.getAll(), categoriesApi.getAll()])
+            .then(([prods, cats]) => {
+                setProductList(prods);
+                setCategoryList(cats);
+            })
             .catch(console.error)
             .finally(() => setLoading(false));
     }, []);
+
+    const filteredProducts = selectedCategory === null
+        ? productList
+        : productList.filter(p => p.categoryId === selectedCategory);
 
     const addToCart = (product: Product) => {
         setCart(prev => {
@@ -59,7 +68,6 @@ export default function POS() {
         try {
             const createdOrder = await ordersApi.create(orderData);
 
-            // Generate and download receipt PDF
             generateReceiptPDF({
                 orderId: createdOrder.id,
                 username: getUsername() || 'Unknown',
@@ -98,15 +106,46 @@ export default function POS() {
             <div className="flex gap-6 items-start">
                 {/* Product grid */}
                 <div className="flex-1">
+                    {/* Category filter tabs */}
+                    {categoryList.length > 0 && (
+                        <div className="flex gap-2 mb-4 flex-wrap">
+                            <button
+                                onClick={() => setSelectedCategory(null)}
+                                className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
+                                    selectedCategory === null
+                                        ? 'text-white bg-[var(--accent)] shadow-sm'
+                                        : 'text-[var(--text-secondary)] bg-[var(--bg-muted)] hover:bg-[var(--border)]'
+                                }`}
+                            >
+                                All
+                            </button>
+                            {categoryList.map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setSelectedCategory(cat.id)}
+                                    className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
+                                        selectedCategory === cat.id
+                                            ? 'text-white bg-[var(--accent)] shadow-sm'
+                                            : 'text-[var(--text-secondary)] bg-[var(--bg-muted)] hover:bg-[var(--border)]'
+                                    }`}
+                                >
+                                    {cat.name}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
                     {loading ? (
                         <div className="text-center py-20 text-[var(--text-muted)]">Loading products…</div>
-                    ) : productList.length === 0 ? (
+                    ) : filteredProducts.length === 0 ? (
                         <div className="card-flat p-12 text-center text-[var(--text-muted)]">
-                            No products available. Add some from the Products page.
+                            {selectedCategory !== null
+                                ? 'No products in this category.'
+                                : 'No products available. Add some from the Products page.'}
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            {productList.map(p => (
+                            {filteredProducts.map(p => (
                                 <button
                                     key={p.id}
                                     onClick={() => addToCart(p)}
@@ -116,6 +155,9 @@ export default function POS() {
                                         {p.name.charAt(0).toUpperCase()}
                                     </div>
                                     <div className="font-semibold text-[var(--text-primary)] text-sm">{p.name}</div>
+                                    {p.categoryName && (
+                                        <div className="text-xs text-[var(--text-muted)] mt-0.5">{p.categoryName}</div>
+                                    )}
                                     <div className="text-[var(--accent)] font-bold mt-1">${p.price.toFixed(2)}</div>
                                 </button>
                             ))}

@@ -150,7 +150,8 @@ async function request<T>(
 }
 
 // ── Types ─────────────────────────────────────────────────
-export type Product = { id: number; name: string; price: number };
+export type Category = { id: number; name: string };
+export type Product = { id: number; name: string; price: number; categoryId: number | null; categoryName: string | null };
 export type Order = { id: number; description: string; totalPrice: number; quantity: number; paidAmount: number; remainingAmount: number };
 export type TokenPair = { accessToken: string; refreshToken: string };
 export type UserInfo = { id: number; username: string; role: string };
@@ -217,7 +218,7 @@ export const products = {
         return request<Product>(`/v1.0/products/${id}`, {}, customToken);
     },
 
-    async create(product: { name: string; price: string | number }, customToken?: string): Promise<Product> {
+    async create(product: { name: string; price: string | number; categoryId?: number | null }, customToken?: string): Promise<Product> {
         return request<Product>('/v1.0/products', {
             method: 'POST',
             body: JSON.stringify(product),
@@ -233,6 +234,23 @@ export const products = {
 
     async delete(id: number, customToken?: string): Promise<void> {
         await request<void>(`/v1.0/products/${id}`, { method: 'DELETE' }, customToken);
+    },
+};
+// ── categories endpoints ─────────────────────────────────────
+export const categories = {
+    async getAll(customToken?: string): Promise<Category[]> {
+        return request<Category[]>('/v1.0/categories', {}, customToken);
+    },
+
+    async create(category: { name: string }, customToken?: string): Promise<Category> {
+        return request<Category>('/v1.0/categories', {
+            method: 'POST',
+            body: JSON.stringify(category),
+        }, customToken);
+    },
+
+    async delete(id: number, customToken?: string): Promise<void> {
+        await request<void>(`/v1.0/categories/${id}`, { method: 'DELETE' }, customToken);
     },
 };
 

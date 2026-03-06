@@ -1,15 +1,16 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { products as productsApi, type Product, ApiError } from '@/lib/api';
+import { products as productsApi, categories as categoriesApi, type Product, type Category, ApiError } from '@/lib/api';
 
 type ModalMode = 'create' | 'edit' | null;
 
 export default function AdminProducts() {
     const [productList, setProductList] = useState<Product[]>([]);
+    const [categoryList, setCategoryList] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [modalMode, setModalMode] = useState<ModalMode>(null);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-    const [form, setForm] = useState({ name: '', price: '' });
+    const [form, setForm] = useState({ name: '', price: '', categoryId: '' });
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
@@ -17,28 +18,33 @@ export default function AdminProducts() {
     const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
     const [deleting, setDeleting] = useState(false);
 
-    useEffect(() => { loadProducts(); }, []);
+    useEffect(() => { loadData(); }, []);
 
-    const loadProducts = async () => {
+    const loadData = async () => {
         try {
-            const data = await productsApi.getAll();
-            setProductList(data);
+            const [prods, cats] = await Promise.all([productsApi.getAll(), categoriesApi.getAll()]);
+            setProductList(prods);
+            setCategoryList(cats);
         } catch (err) {
-            console.error('Failed to load products:', err);
+            console.error('Failed to load data:', err);
         } finally {
             setLoading(false);
         }
     };
 
     const openCreate = () => {
-        setForm({ name: '', price: '' });
+        setForm({ name: '', price: '', categoryId: '' });
         setEditingProduct(null);
         setModalMode('create');
         setError('');
     };
 
     const openEdit = (product: Product) => {
-        setForm({ name: product.name, price: String(product.price) });
+        setForm({
+            name: product.name,
+            price: String(product.price),
+            categoryId: product.categoryId ? String(product.categoryId) : '',
+        });
         setEditingProduct(product);
         setModalMode('edit');
         setError('');
@@ -59,15 +65,20 @@ export default function AdminProducts() {
 
         try {
             if (modalMode === 'create') {
-                await productsApi.create({ name: form.name.trim(), price: form.price });
+                await productsApi.create({
+                    name: form.name.trim(),
+                    price: form.price,
+                    categoryId: form.categoryId ? parseInt(form.categoryId) : null,
+                });
             } else if (modalMode === 'edit' && editingProduct) {
                 await productsApi.update(editingProduct.id, {
                     name: form.name.trim(),
                     price: parseFloat(form.price),
+                    categoryId: form.categoryId ? parseInt(form.categoryId) : null,
                 });
             }
             closeModal();
-            loadProducts();
+            loadData();
         } catch (err) {
             if (err instanceof ApiError && err.status === 403) {
                 setError('You do not have permission to perform this action.');
@@ -86,7 +97,7 @@ export default function AdminProducts() {
         try {
             await productsApi.delete(deleteTarget.id);
             setDeleteTarget(null);
-            loadProducts();
+            loadData();
         } catch (err) {
             if (err instanceof ApiError && err.status === 403) {
                 alert('You do not have permission to delete products.');
@@ -130,6 +141,7 @@ export default function AdminProducts() {
                         {/* Table header */}
                         <div className="flex items-center px-5 py-3 bg-[var(--bg-muted)] text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                             <div className="flex-1">Product</div>
+                            <div className="w-32 text-center">Category</div>
                             <div className="w-28 text-right">Price</div>
                             <div className="w-40 text-right">Actions</div>
                         </div>
@@ -148,6 +160,15 @@ export default function AdminProducts() {
                                         <div className="font-semibold text-sm">{product.name}</div>
                                         <div className="text-xs text-[var(--text-muted)]">ID: {product.id}</div>
                                     </div>
+                                </div>
+                                <div className="w-32 text-center">
+                                    {product.categoryName ? (
+                                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-orange-200">
+                                            {product.categoryName}
+                                        </span>
+                                    ) : (
+                                        <span className="text-xs text-[var(--text-muted)]">—</span>
+                                    )}
                                 </div>
                                 <div className="w-28 text-right font-bold text-[var(--accent)]">
                                     ${product.price.toFixed(2)}
@@ -232,6 +253,21 @@ export default function AdminProducts() {
                                         onChange={e => setForm({ ...form, price: e.target.value })}
                                         required
                                     />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">
+                                        Category
+                                    </label>
+                                    <select
+                                        className="input select"
+                                        value={form.categoryId}
+                                        onChange={e => setForm({ ...form, categoryId: e.target.value })}
+                                    >
+                                        <option value="">No category</option>
+                                        {categoryList.map(cat => (
+                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="flex gap-2 pt-2">
                                     <button onClick={closeModal} className="btn btn-ghost flex-1 py-2.5">
