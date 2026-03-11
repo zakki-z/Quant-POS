@@ -1,14 +1,12 @@
-# Step 1: Use an official OpenJDK base image from Docker Hub
-FROM eclipse-temurin:21-jdk
-
-# Step 2: Set the working directory inside the container
+# Stage 1: Build
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
+COPY . .
+RUN chmod +x mvnw && ./mvnw package -DskipTests
 
-# Step 3: Copy the Spring Boot JAR file into the container
-COPY target/my-spring-boot-app.jar /app/my-spring-boot-app.jar
-
-# Step 4: Expose the port your application runs on
+# Stage 2: Run
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-
-# Step 5: Define the command to run your Spring Boot application
-CMD ["java", "-jar", "/app/my-spring-boot-app.jar"]
+CMD ["java", "-jar", "app.jar"]

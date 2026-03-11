@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.DAO.OrderDAO;
 import com.example.backend.DTOMapper.OrderDTOMapper;
 import com.example.backend.dto.OrderDTO;
 import com.example.backend.entity.Order;
@@ -13,22 +14,26 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderDTOMapper orderDTOMapper;
     private final UserRepository userRepository;
-    public OrderService(OrderRepository orderRepository, OrderDTOMapper orderDTOMapper, UserRepository userRepository){
+    private final OrderDAO orderDAO;
+    public OrderService(OrderRepository orderRepository, OrderDTOMapper orderDTOMapper, UserRepository userRepository, OrderDAO orderDAO){
         this.userRepository=userRepository;
         this.orderRepository=orderRepository;
         this.orderDTOMapper=orderDTOMapper;
+        this.orderDAO=orderDAO;
     }
     //TODO: allow only the admin to get all the orders
     //@PreAuthorize("hasAuthority('ADMIN')")
-    public List<Order> getAllOrders(){
-        return orderRepository.findAll();
+    public List<OrderDTO> getAllOrders(){
+        return orderDAO.findAll().stream()
+                .map(orderDTOMapper::toDto)
+                .collect(Collectors.toList());
     }
     //TODO: clean up
     public List<Order> getAllOrdersPerUser(User user){
@@ -63,7 +68,7 @@ public class OrderService {
         return orderDTOMapper.toDto(updatedOrder);
     }
     @PreAuthorize("hasAuthority('ADMIN')")
-    public void deleteProduct(long orderId){
+    public void deleteOrder(long orderId){
         orderRepository.deleteById(orderId);
     }
 }

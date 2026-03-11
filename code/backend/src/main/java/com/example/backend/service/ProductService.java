@@ -1,6 +1,8 @@
 package com.example.backend.service;
 
 
+import com.example.backend.DAO.OrderDAO;
+import com.example.backend.DAO.ProductDAO;
 import com.example.backend.DTOMapper.ProductDTOMapper;
 import com.example.backend.dto.ProductDTO;
 import com.example.backend.entity.Category;
@@ -12,20 +14,24 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductDTOMapper productDTOMapper;
     private final CategoryRepository categoryRepository;
-    public ProductService(ProductDTOMapper productDTOMapper, ProductRepository productRepository, CategoryRepository categoryRepository){
+    private final ProductDAO productDAO;
+    public ProductService(ProductDTOMapper productDTOMapper, ProductRepository productRepository, CategoryRepository categoryRepository, ProductDAO productDAO){
         this.productRepository=productRepository;
         this.productDTOMapper=productDTOMapper;
         this.categoryRepository=categoryRepository;
+        this.productDAO=productDAO;
     }
-    public List<Product> getAllProducts() {
-
-        return productRepository.findAll();
+    public List<ProductDTO> getAllProducts() {
+        return productDAO.findAll().stream()
+                .map(productDTOMapper::toDto)
+                .collect(Collectors.toList());
     }
     public ProductDTO createProduct(ProductDTO productDTO) {
         Product product = productDTOMapper.toEntity(productDTO);

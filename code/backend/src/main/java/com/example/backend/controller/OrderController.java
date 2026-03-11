@@ -19,7 +19,7 @@ public class OrderController {
     }
     @GetMapping()
     @ResponseStatus(value = HttpStatus.OK)
-    public List<Order> getAllOrders(){
+    public List<OrderDTO> getAllOrders(){
         return orderService.getAllOrders();
     }
     @GetMapping("/{user}")

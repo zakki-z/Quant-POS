@@ -13,8 +13,14 @@ public class OrderDAO {
     public OrderDAO(OrderRepository orderRepository){
         this.orderRepository=orderRepository;
     }
-    public List<Order> findALL(){
+    public List<Order> findAll(){
         return orderRepository.findAll();
+    }
+    public boolean existsById(Long id){
+        return orderRepository.existsById(id);
+    }
+    public boolean existsByName(String name){
+        return orderRepository.existsByName(name);
     }
     public Order save(Order order){
         return orderRepository.save(order);
