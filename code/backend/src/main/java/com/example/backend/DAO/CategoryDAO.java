@@ -16,7 +16,7 @@ public class CategoryDAO {
     public List<Category> getAllCategories(){
         return categoryRepository.findAll();
     }
-    public Optional<Category> getCategoryById(Long id){
+    public Optional<Category> findById(Long id){
         return categoryRepository.findById(id);
     }
     public Category createCategory(Category category){
